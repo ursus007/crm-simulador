@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ficha de Cliente - CRM Simulado</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f7f6; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 400px; }
+        h2 { color: #2c3e50; border-bottom: 2px solid #3498db; }
+        .dato { margin: 10px 0; }
+        label { font-weight: bold; display: block; color: #7f8c8d; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>📞 Llamada Entrante</h2>
+        <div class="dato"><label>Número:</label> <span id="phone">---</span></div>
+        <div class="dato"><label>Código de Cliente:</label> <span id="code">---</span></div>
+        <div class="dato"><label>Nombre:</label> <span id="name">---</span></div>
+        <div class="dato"><label>Estado:</label> <span id="status">En línea</span></div>
+    </div>
+
+    <script>
+        // Capturar parámetros de la URL (?phone=123&code=456...)
+        const params = new URLSearchParams(window.location.search);
+        document.getElementById('phone').textContent = params.get('phone') || 'No disponible';
+        document.getElementById('code').textContent = params.get('code') || 'No disponible';
+        document.getElementById('name').textContent = params.get('name') || 'Desconocido';
+    </script>
+</body>
+</html>
