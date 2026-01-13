@@ -2,35 +2,30 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Simulador CRM - Gestión de Cobranza</title>
+    <title>Ficha de Cliente - Simulador</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f3; display: flex; justify-content: center; padding: 40px; }
-        .ficha { background: white; border-top: 5px solid #2980b9; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; padding: 20px; }
-        .header { border-bottom: 1px solid #ddd; margin-bottom: 20px; padding-bottom: 10px; }
-        .campo { margin-bottom: 15px; display: flex; justify-content: space-between; }
-        .label { font-weight: bold; color: #555; }
-        .valor { color: #2c3e50; background: #f9f9f9; padding: 2px 8px; border-radius: 3px; border: 1px solid #eee; }
-        .badge { background: #27ae60; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8em; }
+        body { font-family: Arial, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; padding: 50px; }
+        .ficha { background: white; padding: 25px; border-radius: 10px; shadow: 0 4px 6px rgba(0,0,0,0.1); width: 350px; border-top: 6px solid #007bff; }
+        h2 { color: #333; margin-top: 0; }
+        .dato { margin: 15px 0; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        label { font-weight: bold; color: #666; display: block; font-size: 0.9em; }
+        span { color: #000; font-size: 1.1em; }
     </style>
 </head>
 <body>
     <div class="ficha">
-        <div class="header">
-            <span class="badge">Llamada Activa</span>
-            <h2>Gestión Progresiva</h2>
-        </div>
-        <div class="campo"><span class="label">Código Cliente (p):</span> <span id="p" class="valor">---</span></div>
-        <div class="campo"><span class="label">Teléfono (t):</span> <span id="t" class="valor">---</span></div>
-        <div class="campo"><span class="label">ID Campaña (b):</span> <span id="b" class="valor">---</span></div>
-        <hr>
-        <p style="font-size: 0.85em; color: #7f8c8d;">Simulación de entorno: PQ005PROGRESIVO</p>
+        <h2>Llamada Entrante</h2>
+        <div class="dato"><label>Código Cliente:</label> <span id="p">---</span></div>
+        <div class="dato"><label>Teléfono:</label> <span id="t">---</span></div>
+        <div class="dato"><label>ID Campaña:</label> <span id="b">---</span></div>
     </div>
 
     <script>
+        // Leer parámetros de la URL
         const params = new URLSearchParams(window.location.search);
-        document.getElementById('p').textContent = params.get('p') || 'Pendiente';
-        document.getElementById('t').textContent = params.get('t') || 'Pendiente';
-        document.getElementById('b').textContent = params.get('b') || 'Sin ID';
+        document.getElementById('p').textContent = params.get('p') || 'No definido';
+        document.getElementById('t').textContent = params.get('t') || 'No definido';
+        document.getElementById('b').textContent = params.get('b') || 'No definido';
     </script>
 </body>
 </html>
