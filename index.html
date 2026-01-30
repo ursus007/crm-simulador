@@ -2,47 +2,135 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ficha de Cliente - ursus007</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Gestión - ursus007</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .ficha { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 400px; border-top: 6px solid #28a745; }
-        h2 { color: #333; margin-top: 0; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
-        .seccion { margin-top: 15px; font-size: 0.8em; color: #28a745; font-weight: bold; text-transform: uppercase; }
-        .dato { margin: 8px 0; border-bottom: 1px solid #f8f9fa; padding-bottom: 5px; }
-        label { font-weight: bold; color: #666; display: block; font-size: 0.85em; }
-        span { color: #000; font-size: 1em; word-break: break-all; }
+        /* Diseño moderno y profesional */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f4f7f9; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .card { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 450px; 
+            border-top: 8px solid #28a745; 
+        }
+        h2 { 
+            color: #333; 
+            margin-bottom: 20px; 
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .section-title {
+            font-size: 0.75rem;
+            color: #28a745;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 20px;
+            letter-spacing: 1px;
+        }
+        .data-row { 
+            display: flex; 
+            justify-content: space-between; 
+            margin: 12px 0; 
+            padding-bottom: 8px; 
+            border-bottom: 1px solid #fafafa;
+        }
+        .label { 
+            font-weight: 600; 
+            color: #666; 
+            font-size: 0.9rem;
+        }
+        .value { 
+            color: #111; 
+            font-size: 0.95rem; 
+            word-break: break-all;
+            text-align: right;
+            padding-left: 10px;
+        }
+        .status-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="ficha">
-        <h2>Llamada Entrante</h2>
-        
-        <div class="seccion">Datos del Cliente</div>
-        <div class="dato"><label>Código Cliente:</label> <span id="p">---</span></div>
-        <div class="dato"><label>Teléfono Cliente:</label> <span id="t">---</span></div>
-        <div class="dato"><label>ID Campaña:</label> <span id="b">---</span></div>
 
-        <div class="seccion">Detalles del Agente</div>
-        <div class="dato"><label>Número Destino (Callee):</label> <span id="cn">---</span></div>
-        <div class="dato"><label>Agente Responsable:</label> <span id="aa">---</span></div>
+    <div class="card">
+        <div style="text-align: center;">
+            <span class="status-badge">● Llamada en Curso</span>
+        </div>
+        <h2>Ficha del Cliente</h2>
+
+        <div class="section-title">Información del Cliente</div>
+        
+        <div class="data-row">
+            <span class="label">Código Cliente (p):</span>
+            <span id="p" class="value">---</span>
+        </div>
+
+        <div class="data-row">
+            <span class="label">Teléfono (t):</span>
+            <span id="t" class="value">---</span>
+        </div>
+
+        <div class="data-row">
+            <span class="label">ID Campaña (b):</span>
+            <span id="b" class="value">---</span>
+        </div>
+
+        <div class="section-title">Asignación</div>
+
+        <div class="data-row">
+            <span class="label">Agente (aa):</span>
+            <span id="aa" class="value">---</span>
+        </div>
+        
+        <div style="margin-top: 30px; font-size: 0.7rem; color: #ccc; text-align: center;">
+            Powered by Cloudflare Workers & GitHub Pages
+        </div>
     </div>
 
     <script>
-        const params = new URLSearchParams(window.location.search);
-        
-        function mostrarDato(id, param) {
-            const val = params.get(param);
-            if (val) {
-                // decodeURIComponent convierte el %40 en @ automáticamente
-                document.getElementById(id).textContent = decodeURIComponent(val);
+        // Función para leer y decodificar los parámetros de la URL
+        function getParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Mapeo de IDs de HTML con parámetros de URL
+            const fields = {
+                'p': 'p',
+                't': 't',
+                'b': 'b',
+                'aa': 'aa'
+            };
+
+            for (const [id, param] of Object.entries(fields)) {
+                const value = urlParams.get(param);
+                if (value) {
+                    // decodeURIComponent arregla la arroba (@) y otros símbolos
+                    document.getElementById(id).textContent = decodeURIComponent(value);
+                }
             }
         }
 
-        mostrarDato('p', 'p');
-        mostrarDato('t', 't');
-        mostrarDato('b', 'b');
-        mostrarDato('cn', 'cn');
-        mostrarDato('aa', 'aa');
+        // Ejecutar al cargar la página
+        window.onload = getParams;
     </script>
+
 </body>
 </html>
