@@ -3,134 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha de Gestión - ursus007</title>
+    <title>CRM Workspace - ursus007</title>
     <style>
-        /* Diseño moderno y profesional */
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #f4f7f9; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
+        /* Estilos generales */
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background-color: #f0f2f5; overflow: hidden;
         }
-        .card { 
-            background: white; 
-            padding: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            width: 100%; 
-            max-width: 450px; 
-            border-top: 8px solid #28a745; 
+
+        .workspace {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
         }
-        h2 { 
-            color: #333; 
-            margin-bottom: 20px; 
+
+        /* Panel Izquierdo: Softphone */
+        .phone-panel {
+            width: 380px;
+            background: #1e272e;
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid #34495e;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .phone-header {
+            padding: 15px;
+            background: #2f3640;
+            color: #dcdde1;
             text-align: center;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-        .section-title {
-            font-size: 0.75rem;
-            color: #28a745;
             font-weight: bold;
-            text-transform: uppercase;
-            margin-top: 20px;
-            letter-spacing: 1px;
-        }
-        .data-row { 
-            display: flex; 
-            justify-content: space-between; 
-            margin: 12px 0; 
-            padding-bottom: 8px; 
-            border-bottom: 1px solid #fafafa;
-        }
-        .label { 
-            font-weight: 600; 
-            color: #666; 
             font-size: 0.9rem;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #353b48;
         }
-        .value { 
-            color: #111; 
-            font-size: 0.95rem; 
+
+        /* Iframe de NXCloud */
+        #softphone-iframe {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+            background: white;
+        }
+
+        /* Panel Derecho: Ficha CRM */
+        .crm-panel {
+            flex-grow: 1;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-y: auto;
+        }
+
+        .customer-card {
+            background: white;
+            width: 100%;
+            max-width: 550px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border-top: 8px solid #2ecc71;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .customer-card.alert {
+            border-top-color: #e67e22;
+            transform: scale(1.02);
+        }
+
+        h2 { margin: 0 0 20px 0; color: #2c3e50; font-size: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        
+        .section-label {
+            font-size: 0.7rem;
+            color: #27ae60;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .field { margin-bottom: 20px; }
+        
+        .label {
+            display: block;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            display: block;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #f0f0f0;
+            min-height: 1.2rem;
             word-break: break-all;
-            text-align: right;
-            padding-left: 10px;
         }
-        .status-badge {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            display: inline-block;
-            margin-bottom: 10px;
+
+        .status-bar {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.75rem;
+            color: #bdc3c7;
         }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div style="text-align: center;">
-            <span class="status-badge">● Llamada en Curso</span>
-        </div>
-        <h2>Ficha del Cliente</h2>
-
-        <div class="section-title">Información del Cliente</div>
-        
-        <div class="data-row">
-            <span class="label">Código Cliente (p):</span>
-            <span id="p" class="value">---</span>
+    <div class="workspace">
+        <div class="phone-panel">
+            <div class="phone-header">NXCLOUD COMMUNICATIONS</div>
+            <iframe id="softphone-iframe" src="https://nxcc.nxcloud.com/agent/index.html"></iframe>
         </div>
 
-        <div class="data-row">
-            <span class="label">Teléfono (t):</span>
-            <span id="t" class="value">---</span>
-        </div>
+        <div class="crm-panel">
+            <div id="card" class="customer-card">
+                <span class="section-label">Información de la llamada</span>
+                <h2>Ficha del Cliente</h2>
 
-        <div class="data-row">
-            <span class="label">ID Campaña (b):</span>
-            <span id="b" class="value">---</span>
-        </div>
+                <div class="field">
+                    <span class="label">Código de Cliente (p)</span>
+                    <span id="p" class="value">Esperando llamada...</span>
+                </div>
 
-        <div class="section-title">Asignación</div>
+                <div class="field">
+                    <span class="label">Teléfono Identificado (t)</span>
+                    <span id="t" class="value">---</span>
+                </div>
 
-        <div class="data-row">
-            <span class="label">Agente (aa):</span>
-            <span id="aa" class="value">---</span>
-        </div>
-        
-        <div style="margin-top: 30px; font-size: 0.7rem; color: #ccc; text-align: center;">
-            Powered by Cloudflare Workers & GitHub Pages
+                <div class="field">
+                    <span class="label">Campaña (b)</span>
+                    <span id="b" class="value">---</span>
+                </div>
+
+                <div class="field">
+                    <span class="label">Agente Asignado (aa)</span>
+                    <span id="aa" class="value">---</span>
+                </div>
+
+                <div class="status-bar">
+                    ID de Sesión Activa: <span id="session-status">Sincronizado</span>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Función para leer y decodificar los parámetros de la URL
-        function getParams() {
-            const urlParams = new URLSearchParams(window.location.search);
+        // CONFIGURACIÓN DEL CANAL DE COMUNICACIÓN
+        const bc = new BroadcastChannel('crm_calls');
+        const cardElement = document.getElementById('card');
+
+        // Escuchar mensajes del Worker (la pestaña que se abre y cierra)
+        bc.onmessage = (event) => {
+            const data = event.data;
             
-            // Mapeo de IDs de HTML con parámetros de URL
-            const fields = {
-                'p': 'p',
-                't': 't',
-                'b': 'b',
-                'aa': 'aa'
-            };
+            // 1. Actualizar los campos visualmente
+            document.getElementById('p').textContent = data.p || 'No disponible';
+            document.getElementById('t').textContent = data.t || 'No disponible';
+            document.getElementById('b').textContent = data.b || 'No disponible';
+            document.getElementById('aa').textContent = decodeURIComponent(data.aa || '---');
 
-            for (const [id, param] of Object.entries(fields)) {
-                const value = urlParams.get(param);
-                if (value) {
-                    // decodeURIComponent arregla la arroba (@) y otros símbolos
-                    document.getElementById(id).textContent = decodeURIComponent(value);
-                }
+            // 2. Efecto visual de "Llamada Entrante"
+            cardElement.classList.add('alert');
+            setTimeout(() => cardElement.classList.remove('alert'), 2000);
+
+            console.log("Nueva llamada recibida y sincronizada:", data);
+        };
+
+        // Lógica para carga inicial si se abre con parámetros directamente
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('p') || params.get('t')) {
+                document.getElementById('p').textContent = params.get('p');
+                document.getElementById('t').textContent = params.get('t');
+                document.getElementById('b').textContent = params.get('b');
+                document.getElementById('aa').textContent = decodeURIComponent(params.get('aa'));
             }
-        }
-
-        // Ejecutar al cargar la página
-        window.onload = getParams;
+        };
     </script>
-
 </body>
 </html>
