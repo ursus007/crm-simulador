@@ -5,25 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRM Workspace - ursus007</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; overflow: hidden; }
-        .workspace { display: flex; height: 100vh; width: 100vw; }
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f0f2f5; overflow: hidden; 
+        }
+
+        .workspace { 
+            display: flex; height: 100vh; width: 100vw; 
+        }
         
         /* Panel Izquierdo: Softphone */
-        .phone-panel { width: 380px; background: #1e272e; display: flex; flex-direction: column; border-right: 2px solid #34495e; box-shadow: 2px 0 10px rgba(0,0,0,0.2); z-index: 10; }
-        .phone-header { padding: 15px; background: #2f3640; color: #dcdde1; text-align: center; font-weight: bold; font-size: 0.8rem; letter-spacing: 1px; }
-        #softphone-iframe { flex-grow: 1; width: 100%; border: none; background: white; }
+        .phone-panel { 
+            width: 380px; background: #1e272e; display: flex; 
+            flex-direction: column; border-right: 2px solid #34495e; 
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2); z-index: 10; 
+        }
+
+        .phone-header { 
+            padding: 15px; background: #2f3640; color: #dcdde1; 
+            text-align: center; font-weight: bold; font-size: 0.8rem; letter-spacing: 1px; 
+        }
+
+        #softphone-iframe { 
+            flex-grow: 1; width: 100%; border: none; background: white; 
+        }
 
         /* Panel Derecho: Ficha CRM */
-        .crm-panel { flex-grow: 1; padding: 40px; display: flex; justify-content: center; align-items: flex-start; overflow-y: auto; }
-        .customer-card { background: white; width: 100%; max-width: 550px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-top: 8px solid #2ecc71; padding: 30px; }
-        h2 { margin: 0 0 20px 0; color: #2c3e50; font-size: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .label { display: block; font-size: 0.85rem; color: #7f8c8d; font-weight: 600; margin-bottom: 5px; }
-        .value { display: block; font-size: 1.1rem; color: #2c3e50; background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #f0f0f0; min-height: 1.2rem; margin-bottom: 20px; }
+        .crm-panel { 
+            flex-grow: 1; padding: 40px; display: flex; 
+            justify-content: center; align-items: flex-start; overflow-y: auto; 
+        }
+
+        .customer-card { 
+            background: white; width: 100%; max-width: 550px; 
+            border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            border-top: 8px solid #2ecc71; padding: 30px; 
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .customer-card.alert {
+            border-top-color: #e67e22;
+            transform: scale(1.01);
+        }
+
+        h2 { 
+            margin: 0 0 20px 0; color: #2c3e50; font-size: 1.5rem; 
+            border-bottom: 1px solid #eee; padding-bottom: 10px; 
+        }
+
+        .label { 
+            display: block; font-size: 0.85rem; color: #7f8c8d; 
+            font-weight: 600; margin-bottom: 5px; 
+        }
+
+        .value { 
+            display: block; font-size: 1.1rem; color: #2c3e50; 
+            background: #f9f9f9; padding: 10px; border-radius: 6px; 
+            border: 1px solid #f0f0f0; min-height: 1.2rem; margin-bottom: 20px; 
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
 
     <div class="workspace">
+        <!-- LADO IZQUIERDO: TELÉFONO -->
         <div class="phone-panel">
             <div class="phone-header">NXCC SOFTPHONE</div>
             <iframe 
@@ -34,8 +81,9 @@
             </iframe>
         </div>
 
+        <!-- LADO DERECHO: FICHA DE CLIENTE -->
         <div class="crm-panel">
-            <div class="customer-card">
+            <div id="customer-card" class="customer-card">
                 <h2>Ficha del Cliente</h2>
 
                 <span class="label">Código de Cliente (p)</span>
@@ -53,60 +101,63 @@
         </div>
     </div>
 
-<script>
-    const bc = new BroadcastChannel('crm_calls');
-    const cardElement = document.getElementById('card');
+    <script>
+        const bc = new BroadcastChannel('crm_calls');
 
-    function cleanData(str) {
-        if (!str) return "---";
-        try {
-            if (str.includes('=') || str.length > 15) {
-                return atob(str); 
+        // Limpieza segura de datos evitando errores de codificación
+        function clean(str) {
+            if (!str) return "---";
+            try {
+                return decodeURIComponent(str);
+            } catch (e) {
+                return str;
             }
-        } catch (e) { }
-        return decodeURIComponent(str);
-    }
-
-    function updateUI(data) {
-        if (!data) return;
-        document.getElementById('p').textContent = cleanData(data.p);
-        document.getElementById('t').textContent = cleanData(data.t);
-        document.getElementById('b').textContent = cleanData(data.b);
-        document.getElementById('aa').textContent = cleanData(data.aa);
-
-        if (cardElement) {
-            cardElement.classList.add('alert');
-            setTimeout(() => cardElement.classList.remove('alert'), 2000);
         }
-    }
 
-    // Escuchar mensajes entrantes (Pestaña Principal)
-    bc.onmessage = (event) => {
-        updateUI(event.data);
-    };
+        // Renderizado visual en los campos HTML
+        function renderCard(data) {
+            if (!data) return;
 
-    // Al cargar la página
-    window.onload = () => {
-        const params = new URLSearchParams(window.location.search);
-        
-        // Si la URL trae datos (Pestaña Secundaria que vino del Worker)
-        if (params.get('p') || params.get('t') || params.get('b')) {
-            const callData = {
-                p: params.get('p') || '',
-                t: params.get('t') || '',
-                b: params.get('b') || '',
-                aa: params.get('aa') || ''
-            };
+            document.getElementById('p').textContent = clean(data.p);
+            document.getElementById('t').textContent = clean(data.t);
+            document.getElementById('b').textContent = clean(data.b);
+            document.getElementById('aa').textContent = clean(data.aa);
 
-            // 1. Emitir los datos por el canal de mismo origen
-            bc.postMessage(callData);
-
-            // 2. Intentar cerrarse automáticamente
-            setTimeout(() => {
-                window.close();
-            }, 300);
+            const card = document.getElementById('customer-card');
+            if (card) {
+                card.classList.add('alert');
+                setTimeout(() => card.classList.remove('alert'), 1500);
+            }
         }
-    };
-</script>
+
+        // 1. Escuchar actualizaciones de la transmisión en tiempo real
+        bc.onmessage = (event) => {
+            renderCard(event.data);
+        };
+
+        // 2. Procesar los parámetros de la URL
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const p = params.get('p');
+            const t = params.get('t');
+            const b = params.get('b');
+            const aa = params.get('aa');
+
+            if (p || t || b || aa) {
+                const callData = { p: p || '', t: t || '', b: b || '', aa: aa || '' };
+
+                // Renderizar inmediatamente en la pestaña actual
+                renderCard(callData);
+
+                // Notificar a otras pestañas abiertas
+                bc.postMessage(callData);
+
+                // Si fue abierta como una pestaña emergente por el Worker, cerrarse tras sincronizar
+                if (window.opener || window.history.length === 1) {
+                    setTimeout(() => window.close(), 400);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
