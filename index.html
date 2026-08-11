@@ -53,38 +53,60 @@
         </div>
     </div>
 
-    <script>
-        const bc = new BroadcastChannel('crm_calls');
+<script>
+    const bc = new BroadcastChannel('crm_calls');
+    const cardElement = document.getElementById('card');
 
-        // Función para limpiar Base64 o URL encode
-        function cleanData(str) {
-            if (!str) return "---";
-            try {
-                // Si el dato parece Base64 (como en tu captura), intenta decodificarlo
-                if (str.includes('=') || str.length > 15) {
-                    return atob(str); 
-                }
-            } catch (e) { }
-            return decodeURIComponent(str);
-        }
-
-        function updateUI(data) {
-            document.getElementById('p').textContent = cleanData(data.p);
-            document.getElementById('t').textContent = cleanData(data.t);
-            document.getElementById('b').textContent = cleanData(data.b);
-            document.getElementById('aa').textContent = cleanData(data.aa);
-        }
-
-        bc.onmessage = (event) => {
-            updateUI(event.data);
-        };
-
-        window.onload = () => {
-            const params = new URLSearchParams(window.location.search);
-            if(params.get('p')) {
-                updateUI(Object.fromEntries(params));
+    function cleanData(str) {
+        if (!str) return "---";
+        try {
+            if (str.includes('=') || str.length > 15) {
+                return atob(str); 
             }
-        };
-    </script>
+        } catch (e) { }
+        return decodeURIComponent(str);
+    }
+
+    function updateUI(data) {
+        if (!data) return;
+        document.getElementById('p').textContent = cleanData(data.p);
+        document.getElementById('t').textContent = cleanData(data.t);
+        document.getElementById('b').textContent = cleanData(data.b);
+        document.getElementById('aa').textContent = cleanData(data.aa);
+
+        if (cardElement) {
+            cardElement.classList.add('alert');
+            setTimeout(() => cardElement.classList.remove('alert'), 2000);
+        }
+    }
+
+    // Escuchar mensajes entrantes (Pestaña Principal)
+    bc.onmessage = (event) => {
+        updateUI(event.data);
+    };
+
+    // Al cargar la página
+    window.onload = () => {
+        const params = new URLSearchParams(window.location.search);
+        
+        // Si la URL trae datos (Pestaña Secundaria que vino del Worker)
+        if (params.get('p') || params.get('t') || params.get('b')) {
+            const callData = {
+                p: params.get('p') || '',
+                t: params.get('t') || '',
+                b: params.get('b') || '',
+                aa: params.get('aa') || ''
+            };
+
+            // 1. Emitir los datos por el canal de mismo origen
+            bc.postMessage(callData);
+
+            // 2. Intentar cerrarse automáticamente
+            setTimeout(() => {
+                window.close();
+            }, 300);
+        }
+    };
+</script>
 </body>
 </html>
