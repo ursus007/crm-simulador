@@ -1,163 +1,600 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Workspace - ursus007</title>
-    <style>
-        body, html { 
-            margin: 0; padding: 0; height: 100%; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #f0f2f5; overflow: hidden; 
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estar Vital — CRM Pacientes</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#181c25;--surface2:#1e2330;
+  --border:#2a2f3d;--border2:#343a4d;
+  --text:#e8eaf0;--text2:#8b91a8;--text3:#555d75;
+  --accent:#4f8ef7;--accent-dim:#1a2a4a;
+  --green:#34d18a;--green-dim:#0d2e1f;
+  --amber:#f5a623;--amber-dim:#2e1f08;
+  --red:#f05a5a;--red-dim:#2e0d0d;
+  --radius:12px;--radius-sm:8px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
 
-        .workspace { 
-            display: flex; height: 100vh; width: 100vw; 
-        }
-        
-        /* Panel Izquierdo: Softphone */
-        .phone-panel { 
-            width: 380px; background: #1e272e; display: flex; 
-            flex-direction: column; border-right: 2px solid #34495e; 
-            box-shadow: 2px 0 10px rgba(0,0,0,0.2); z-index: 10; 
-        }
+/* Layout principal */
+.layout{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;flex-shrink:0;display:flex;flex-direction:column}
+.sidebar-logo{padding:0 20px 24px;border-bottom:1px solid var(--border)}
+.logo-mark{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#4f8ef7,#9b6dff);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.logo-text{font-size:13px;font-weight:600;color:var(--text);line-height:1.2}
+.logo-sub{font-size:10px;color:var(--text3);font-weight:400}
+.nav{padding:16px 12px;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:2px}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--accent-dim);color:var(--accent)}
+.nav-icon{font-size:15px;width:18px;text-align:center}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border)}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;animation:blink 2s infinite;display:inline-block}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.sync-status{display:flex;align-items:center;gap:8px}
+.sync-text{font-size:11px;color:var(--text3)}
+.sync-time{font-size:10px;color:var(--text3);margin-top:2px}
 
-        .phone-header { 
-            padding: 15px; background: #2f3640; color: #dcdde1; 
-            text-align: center; font-weight: bold; font-size: 0.8rem; letter-spacing: 1px; 
-        }
+/* Main + softphone */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.body-row{display:flex;flex:1;overflow:hidden}
+.content-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
-        #softphone-iframe { 
-            flex-grow: 1; width: 100%; border: none; background: white; 
-        }
+/* Softphone panel */
+.phone-panel{width:0;background:var(--surface);border-left:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;transition:width .3s ease;overflow:hidden}
+.phone-panel.open{width:380px}
+.phone-header{padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.phone-header-title{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.phone-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+.phone-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:4px}
+.phone-close:hover{background:var(--border);color:var(--text)}
+#softphone-iframe{flex:1;width:100%;border:none;background:#fff}
 
-        /* Panel Derecho: Ficha CRM */
-        .crm-panel { 
-            flex-grow: 1; padding: 40px; display: flex; 
-            justify-content: center; align-items: flex-start; overflow-y: auto; 
-        }
+/* Topbar */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.page-title{font-size:16px;font-weight:600;color:var(--text);flex:1}
+.page-sub{font-size:12px;color:var(--text3);margin-top:1px}
+.actions{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:var(--radius-sm);border:1px solid transparent;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit}
+.btn svg{width:14px;height:14px;flex-shrink:0}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#3d7de8}
+.btn-phone{background:#1a3040;color:#4fc3f7;border-color:#1e4060}
+.btn-phone:hover{background:#1e3a4a}
+.btn-phone.active{background:#0d2535;color:var(--green);border-color:#1a4a33}
+.btn-push{background:var(--green-dim);color:var(--green);border-color:#1a4a33}
+.btn-push:hover{background:#112a1f}
+.btn-pull{background:var(--accent-dim);color:var(--accent);border-color:#1a3060}
+.btn-pull:hover{background:#132040}
 
-        .customer-card { 
-            background: white; width: 100%; max-width: 550px; 
-            border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-            border-top: 8px solid #2ecc71; padding: 30px; 
-            transition: transform 0.2s ease, border-color 0.2s ease;
-        }
+/* Content */
+.content{flex:1;padding:20px 24px;overflow:auto}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.stat-value{font-size:22px;font-weight:600;color:var(--text);line-height:1}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:4px}
+.stat-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px}
 
-        .customer-card.alert {
-            border-top-color: #e67e22;
-            transform: scale(1.01);
-        }
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.table-title{font-size:14px;font-weight:600;color:var(--text)}
+.search-wrap{position:relative}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text3);pointer-events:none}
+.search{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px 7px 32px;font-size:13px;color:var(--text);width:200px;font-family:inherit}
+.search::placeholder{color:var(--text3)}
+.search:focus{outline:none;border-color:var(--accent)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
+th{text-align:left;padding:9px 14px;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text2)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.td-name{font-weight:500;color:var(--text)}
+.td-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:monospace}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;border-radius:20px;padding:3px 9px;white-space:nowrap}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.b-green{background:var(--green-dim);color:var(--green)}.b-green::before{background:var(--green)}
+.b-amber{background:var(--amber-dim);color:var(--amber)}.b-amber::before{background:var(--amber)}
+.b-red{background:var(--red-dim);color:var(--red)}.b-red::before{background:var(--red)}
+.act-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:transparent;font-size:11px;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .15s}
+.act-btn:hover{background:var(--surface2);color:var(--text)}
+.empty{text-align:center;padding:48px;color:var(--text3)}
 
-        h2 { 
-            margin: 0 0 20px 0; color: #2c3e50; font-size: 1.5rem; 
-            border-bottom: 1px solid #eee; padding-bottom: 10px; 
-        }
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:200;padding:16px;backdrop-filter:blur(4px)}
+.overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.modal-title{font-size:16px;font-weight:600;color:var(--text)}
+.modal-close{width:28px;height:28px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+.modal-close:hover{background:var(--border);color:var(--text)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field-label{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+input,select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;transition:border-color .15s;-webkit-appearance:none}
+input::placeholder{color:var(--text3)}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+select option{background:var(--surface2)}
+.section-sep{grid-column:1/-1;border:none;border-top:1px solid var(--border);margin:4px 0}
+.section-name{grid-column:1/-1;font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.modal-foot{display:flex;gap:10px;margin-top:20px;grid-column:1/-1}
+.btn-save{flex:1;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+.btn-save:hover{background:#3d7de8}
+.btn-save:disabled{background:#1a2a4a;color:var(--text3);cursor:not-allowed}
+.btn-cancel-modal{padding:10px 16px;background:transparent;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:13px;color:var(--text2);cursor:pointer;font-family:inherit}
+.btn-cancel-modal:hover{background:var(--surface2)}
 
-        .label { 
-            display: block; font-size: 0.85rem; color: #7f8c8d; 
-            font-weight: 600; margin-bottom: 5px; 
-        }
-
-        .value { 
-            display: block; font-size: 1.1rem; color: #2c3e50; 
-            background: #f9f9f9; padding: 10px; border-radius: 6px; 
-            border: 1px solid #f0f0f0; min-height: 1.2rem; margin-bottom: 20px; 
-            word-break: break-all;
-        }
-    </style>
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:12px 20px;font-size:13px;color:var(--text);opacity:0;transition:all .3s;pointer-events:none;z-index:999;max-width:420px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.4);display:flex;align-items:center;gap:10px}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast .t-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.refresh-bar{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3)}
+.refresh-spinner{width:12px;height:12px;border:1.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:none}
+.refreshing .refresh-spinner{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
 
-    <div class="workspace">
-        <!-- LADO IZQUIERDO: TELÉFONO -->
-        <div class="phone-panel">
-            <div class="phone-header">NXCC SOFTPHONE</div>
-            <iframe 
-                id="softphone-iframe" 
-                src="https://chl-nxlink.nxcloud.com/admin/#/iframe_login" 
-                allow="microphone; autoplay; clipboard-write"
-                loading="lazy">
-            </iframe>
+<div id="toast"><div class="t-dot" id="tdot"></div><span id="tmsg"></span></div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">Nuevo paciente</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="grid2">
+      <div class="section-name">Datos básicos</div>
+      <div class="field full">
+        <div class="field-label">Nombre completo *</div>
+        <input id="fName" placeholder="Ej: María Elena Quispe">
+      </div>
+      <div class="field">
+        <div class="field-label">DNI</div>
+        <input id="fDni" placeholder="12345678" maxlength="8">
+      </div>
+      <div class="field">
+        <div class="field-label">Teléfono 1 *</div>
+        <input id="fPhone" placeholder="51987654321">
+      </div>
+      <div class="field">
+        <div class="field-label">Teléfono 2</div>
+        <input id="fTelefono2" placeholder="51987654322">
+      </div>
+      <div class="field">
+        <div class="field-label">Teléfono 3</div>
+        <input id="fTelefono3" placeholder="51987654323">
+      </div>
+      <div class="field">
+        <div class="field-label">Email</div>
+        <input id="fEmail" type="email" placeholder="paciente@email.com">
+      </div>
+      <div class="field">
+        <div class="field-label">Familiar o Cuidador</div>
+        <input id="fFamiliar" placeholder="Nombre del cuidador">
+      </div>
+      <hr class="section-sep">
+      <div class="section-name">Información clínica</div>
+      <div class="field">
+        <div class="field-label">Diagnóstico</div>
+        <input id="fDiagnosis" placeholder="Ej: Hipertensión arterial">
+      </div>
+      <div class="field">
+        <div class="field-label">Doctor</div>
+        <input id="fDoctor" placeholder="Dr. Apellido">
+      </div>
+      <div class="field">
+        <div class="field-label">Última visita</div>
+        <input id="fLastVisit" type="date">
+      </div>
+      <div class="field">
+        <div class="field-label">Tipo de Servicio</div>
+        <select id="fTipoServicio">
+          <option value="">— Seleccionar —</option>
+          <option value="1786135583765">Crónico</option>
+          <option value="1786135583766">Agudo</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label">IAFAS</div>
+        <select id="fIafas">
+          <option value="">— Seleccionar —</option>
+          <option value="1786135885165">FESUNAT</option>
+          <option value="1786135885166">SEDAPAL</option>
+          <option value="1786135897173">MEF</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label">Tipificación</div>
+        <select id="fTipificacion">
+          <option value="">— Seleccionar —</option>
+          <option value="1786135707189">VIP</option>
+          <option value="1786135707190">Sindical</option>
+          <option value="1786135714069">Regular</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label">Modalidad</div>
+        <select id="fModalidad">
+          <option value="">— Seleccionar —</option>
+          <option value="1787862358884">Presencial</option>
+          <option value="1787862358885">Presencial - Sede</option>
+          <option value="1787862369953">Siempre presencial</option>
+          <option value="1787862375555">Siempre virtual</option>
+          <option value="1787862386832">Virtual</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label">Grupo</div>
+        <input id="fGrupo" placeholder="Ej: Adulto Mayor">
+      </div>
+      <div class="field">
+        <div class="field-label">Sede</div>
+        <input id="fSede" placeholder="Ej: Lima Norte">
+      </div>
+      <hr class="section-sep">
+      <div class="section-name">Ubicación</div>
+      <div class="field">
+        <div class="field-label">Provincia</div>
+        <input id="fProvincia" placeholder="Ej: Lima">
+      </div>
+      <div class="field">
+        <div class="field-label">Distrito</div>
+        <input id="fDistrito" placeholder="Ej: Miraflores">
+      </div>
+      <div class="field full">
+        <div class="field-label">Dirección Casa</div>
+        <input id="fDireccion" placeholder="Ej: Av. Javier Prado 1234">
+      </div>
+      <input type="hidden" id="fClientId">
+      <div class="modal-foot">
+        <button class="btn-save" id="btnSave" onclick="savePatient()">Guardar y sincronizar</button>
+        <button class="btn-cancel-modal" onclick="closeModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon">🏥</div>
+        <div>
+          <div class="logo-text">Estar Vital</div>
+          <div class="logo-sub">CRM Pacientes</div>
         </div>
-
-        <!-- LADO DERECHO: FICHA DE CLIENTE -->
-        <div class="crm-panel">
-            <div id="customer-card" class="customer-card">
-                <h2>Ficha del Cliente</h2>
-
-                <span class="label">Código de Cliente (p)</span>
-                <span id="p" class="value">Esperando...</span>
-
-                <span class="label">Teléfono Identificado (t)</span>
-                <span id="t" class="value">---</span>
-
-                <span class="label">ID Campaña (b)</span>
-                <span id="b" class="value">---</span>
-
-                <span class="label">Agente Asignado (aa)</span>
-                <span id="aa" class="value">---</span>
-            </div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active"><span class="nav-icon">👥</span> Pacientes</div>
+      <div class="nav-item"><span class="nav-icon">📊</span> Estadísticas</div>
+      <div class="nav-item"><span class="nav-icon">🔄</span> Sincronización</div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span> Configuración</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sync-status">
+        <div class="pulse"></div>
+        <div>
+          <div class="sync-text">NXLINK CDP</div>
+          <div class="sync-time" id="lastSync">Esperando sync…</div>
         </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Pacientes</div>
+        <div class="page-sub">Sincronización bidireccional con NXLINK</div>
+      </div>
+      <div class="actions">
+        <div class="refresh-bar" id="refreshBar">
+          <div class="refresh-spinner" id="spinner"></div>
+          <span id="refreshLabel">Auto-sync activo</span>
+        </div>
+        <button class="btn btn-pull" onclick="syncPull()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Pull ← NXCC
+        </button>
+        <button class="btn btn-push" onclick="syncPush()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          Push → NXCC
+        </button>
+        <button class="btn btn-primary" onclick="openModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nuevo paciente
+        </button>
+        <button class="btn btn-phone" id="btnPhone" onclick="togglePhone()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .84h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          Softphone
+        </button>
+      </div>
     </div>
 
-    <script>
-        const bc = new BroadcastChannel('crm_calls');
+    <div class="body-row">
+      <div class="content-area">
+        <div class="content">
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">Total pacientes</div>
+              <div class="stat-value" id="statTotal">—</div>
+              <div class="stat-sub">Registrados en BD</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Sincronizados</div>
+              <div class="stat-value" style="color:var(--green)" id="statSynced">—</div>
+              <div class="stat-sub"><span class="stat-dot" style="background:var(--green)"></span>Con NXCC</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Pendientes</div>
+              <div class="stat-value" style="color:var(--amber)" id="statPending">—</div>
+              <div class="stat-sub"><span class="stat-dot" style="background:var(--amber)"></span>Por sincronizar</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Conflictos</div>
+              <div class="stat-value" style="color:var(--red)" id="statConflict">—</div>
+              <div class="stat-sub"><span class="stat-dot" style="background:var(--red)"></span>Requieren revisión</div>
+            </div>
+          </div>
 
-        // Limpieza segura de datos evitando errores de codificación
-        function clean(str) {
-            if (!str) return "---";
-            try {
-                return decodeURIComponent(str);
-            } catch (e) {
-                return str;
-            }
-        }
+          <div class="table-card">
+            <div class="table-header">
+              <div class="table-title">Directorio de pacientes</div>
+              <div class="search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input class="search" id="searchInput" placeholder="Buscar paciente…" oninput="filterTable()">
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr>
+                  <th>Paciente / DNI</th>
+                  <th>Teléfono</th>
+                  <th>IAFAS</th>
+                  <th>Tipo</th>
+                  <th>Modalidad</th>
+                  <th>Tipificación</th>
+                  <th>Provincia</th>
+                  <th>Sede</th>
+                  <th>Estado</th>
+                  <th></th>
+                </tr></thead>
+                <tbody id="tbody">
+                  <tr><td colspan="10" class="empty">Cargando…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        // Renderizado visual en los campos HTML
-        function renderCard(data) {
-            if (!data) return;
+      <!-- Panel Softphone -->
+      <div class="phone-panel" id="phonePanel">
+        <div class="phone-header">
+          <div class="phone-header-title">
+            <div class="phone-dot"></div>
+            NXCC SOFTPHONE
+          </div>
+          <button class="phone-close" onclick="togglePhone()">×</button>
+        </div>
+        <iframe
+          id="softphone-iframe"
+          src="https://chl-nxlink.nxcloud.com/admin/#/iframe_login"
+          allow="microphone; autoplay; clipboard-write; camera"
+          loading="lazy">
+        </iframe>
+      </div>
+    </div>
+  </div>
+</div>
 
-            document.getElementById('p').textContent = clean(data.p);
-            document.getElementById('t').textContent = clean(data.t);
-            document.getElementById('b').textContent = clean(data.b);
-            document.getElementById('aa').textContent = clean(data.aa);
+<script>
+const API = 'https://nxcc-sync-worker.ursus006.workers.dev';
 
-            const card = document.getElementById('customer-card');
-            if (card) {
-                card.classList.add('alert');
-                setTimeout(() => card.classList.remove('alert'), 1500);
-            }
-        }
+const IAFAS = {'1786135885165':'FESUNAT','1786135885166':'SEDAPAL','1786135897173':'MEF'};
+const SERVICIO = {'1786135583765':'Crónico','1786135583766':'Agudo'};
+const TIPIF = {'1786135707189':'VIP','1786135707190':'Sindical','1786135714069':'Regular'};
+const MODALIDAD = {
+  '1787862358884':'Presencial','1787862358885':'Presencial - Sede',
+  '1787862369953':'Siempre presencial','1787862375555':'Siempre virtual','1787862386832':'Virtual',
+};
 
-        // 1. Escuchar actualizaciones de la transmisión en tiempo real
-        bc.onmessage = (event) => {
-            renderCard(event.data);
-        };
+let allPatients = [];
+let phoneOpen = false;
 
-        // 2. Procesar los parámetros de la URL
-        document.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const p = params.get('p');
-            const t = params.get('t');
-            const b = params.get('b');
-            const aa = params.get('aa');
+window.onload = () => { loadPatients(); setInterval(loadPatients, 60000); };
 
-            if (p || t || b || aa) {
-                const callData = { p: p || '', t: t || '', b: b || '', aa: aa || '' };
+function togglePhone() {
+  phoneOpen = !phoneOpen;
+  const panel = document.getElementById('phonePanel');
+  const btn   = document.getElementById('btnPhone');
+  panel.classList.toggle('open', phoneOpen);
+  btn.classList.toggle('active', phoneOpen);
+}
 
-                // Renderizar inmediatamente en la pestaña actual
-                renderCard(callData);
+function toast(msg, type='info') {
+  document.getElementById('tdot').style.background =
+    type==='success'?'var(--green)':type==='error'?'var(--red)':'var(--accent)';
+  document.getElementById('tmsg').textContent = msg;
+  const el = document.getElementById('toast');
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 4000);
+}
 
-                // Notificar a otras pestañas abiertas
-                bc.postMessage(callData);
+async function loadPatients() {
+  const bar = document.getElementById('refreshBar');
+  const lbl = document.getElementById('refreshLabel');
+  bar.classList.add('refreshing');
+  lbl.textContent = 'Actualizando…';
+  try {
+    const r = await fetch(`${API}/api/patients`);
+    const j = await r.json();
+    allPatients = j.data || [];
+    renderTable(allPatients);
+    updateStats(allPatients);
+    const now = new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('lastSync').textContent = `Sync: ${now}`;
+    lbl.textContent = 'Auto-sync activo';
+  } catch(e) {
+    lbl.textContent = 'Sin conexión';
+  } finally {
+    bar.classList.remove('refreshing');
+  }
+}
 
-                // Si fue abierta como una pestaña emergente por el Worker, cerrarse tras sincronizar
-                if (window.opener || window.history.length === 1) {
-                    setTimeout(() => window.close(), 400);
-                }
-            }
-        });
-    </script>
+function updateStats(p) {
+  document.getElementById('statTotal').textContent   = p.length;
+  document.getElementById('statSynced').textContent  = p.filter(x=>x.sync_status==='synced').length;
+  document.getElementById('statPending').textContent = p.filter(x=>x.sync_status==='pending').length;
+  document.getElementById('statConflict').textContent= p.filter(x=>x.sync_status==='conflict').length;
+}
+
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = q ? allPatients.filter(p =>
+    (p.name||'').toLowerCase().includes(q) ||
+    (p.dni||'').includes(q) ||
+    (p.phone||'').includes(q) ||
+    (p.provincia||'').toLowerCase().includes(q)
+  ) : allPatients;
+  renderTable(filtered);
+}
+
+function lbl(map,val){return map[val]||val||'—'}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function renderTable(patients) {
+  const tb = document.getElementById('tbody');
+  if (!patients.length) {
+    tb.innerHTML = '<tr><td colspan="10" class="empty">No se encontraron pacientes</td></tr>';
+    return;
+  }
+  tb.innerHTML = patients.map(p=>`
+    <tr>
+      <td>
+        <div class="td-name">${esc(p.name)}</div>
+        <div class="td-sub">DNI ${esc(p.dni||'—')}</div>
+      </td>
+      <td>
+        <div>${esc(p.phone||'—')}</div>
+        ${p.telefono2?`<div class="td-sub">${esc(p.telefono2)}</div>`:''}
+      </td>
+      <td>${lbl(IAFAS,p.iafas)}</td>
+      <td>${lbl(SERVICIO,p.tipo_servicio)}</td>
+      <td>${lbl(MODALIDAD,p.modalidad)}</td>
+      <td>${lbl(TIPIF,p.tipificacion)}</td>
+      <td>${esc(p.provincia||'—')}</td>
+      <td>${esc(p.sede||'—')}</td>
+      <td>${badge(p.sync_status)}</td>
+      <td><button class="act-btn" onclick='editPatient(${JSON.stringify(p)})'>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Editar
+      </button></td>
+    </tr>
+  `).join('');
+}
+
+function badge(s){
+  if(s==='synced')   return '<span class="badge b-green">Sincronizado</span>';
+  if(s==='conflict') return '<span class="badge b-red">Conflicto</span>';
+  return '<span class="badge b-amber">Pendiente</span>';
+}
+
+function openModal(p=null){
+  document.getElementById('modalTitle').textContent = p?'Editar paciente':'Nuevo paciente';
+  document.getElementById('fName').value         = p?.name         ||'';
+  document.getElementById('fDni').value          = p?.dni          ||'';
+  document.getElementById('fPhone').value        = p?.phone        ||'';
+  document.getElementById('fTelefono2').value    = p?.telefono2    ||'';
+  document.getElementById('fTelefono3').value    = p?.telefono3    ||'';
+  document.getElementById('fEmail').value        = p?.email        ||'';
+  document.getElementById('fFamiliar').value     = p?.familiar     ||'';
+  document.getElementById('fDiagnosis').value    = p?.diagnosis    ||'';
+  document.getElementById('fDoctor').value       = p?.doctor       ||'';
+  document.getElementById('fLastVisit').value    = p?.last_visit   ||'';
+  document.getElementById('fTipoServicio').value = p?.tipo_servicio||'';
+  document.getElementById('fIafas').value        = p?.iafas        ||'';
+  document.getElementById('fTipificacion').value = p?.tipificacion ||'';
+  document.getElementById('fModalidad').value    = p?.modalidad    ||'';
+  document.getElementById('fGrupo').value        = p?.grupo        ||'';
+  document.getElementById('fSede').value         = p?.sede         ||'';
+  document.getElementById('fProvincia').value    = p?.provincia    ||'';
+  document.getElementById('fDistrito').value     = p?.distrito     ||'';
+  document.getElementById('fDireccion').value    = p?.direccion    ||'';
+  document.getElementById('fClientId').value     = p?.client_id    ||'';
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('fName').focus();
+}
+function editPatient(p){openModal(p)}
+function closeModal(){document.getElementById('overlay').classList.remove('show')}
+
+async function savePatient(){
+  const name  = document.getElementById('fName').value.trim();
+  const phone = document.getElementById('fPhone').value.trim();
+  if(!name||!phone){toast('Nombre y teléfono son obligatorios','error');return}
+  const btn = document.getElementById('btnSave');
+  btn.disabled=true;btn.textContent='Guardando…';
+  try{
+    const r = await fetch(`${API}/api/patients`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        clientId:    document.getElementById('fClientId').value||undefined,
+        name, phone,
+        email:       document.getElementById('fEmail').value.trim(),
+        diagnosis:   document.getElementById('fDiagnosis').value.trim(),
+        doctor:      document.getElementById('fDoctor').value.trim(),
+        lastVisit:   document.getElementById('fLastVisit').value,
+        dni:         document.getElementById('fDni').value.trim(),
+        familiar:    document.getElementById('fFamiliar').value.trim(),
+        iafas:       document.getElementById('fIafas').value,
+        grupo:       document.getElementById('fGrupo').value.trim(),
+        tipoServicio:document.getElementById('fTipoServicio').value,
+        provincia:   document.getElementById('fProvincia').value.trim(),
+        distrito:    document.getElementById('fDistrito').value.trim(),
+        tipificacion:document.getElementById('fTipificacion').value,
+        modalidad:   document.getElementById('fModalidad').value,
+        sede:        document.getElementById('fSede').value.trim(),
+        direccion:   document.getElementById('fDireccion').value.trim(),
+        telefono2:   document.getElementById('fTelefono2').value.trim(),
+        telefono3:   document.getElementById('fTelefono3').value.trim(),
+      }),
+    });
+    const j = await r.json();
+    if(j.ok){
+      toast(j.nxcc?.code===0?'✓ Guardado y sincronizado':'✓ Guardado · NXCC pendiente',j.nxcc?.code===0?'success':'info');
+      closeModal();loadPatients();
+    }else{toast('Error: '+(j.error||'desconocido'),'error')}
+  }catch(e){toast('Error de conexión','error')}
+  finally{btn.disabled=false;btn.textContent='Guardar y sincronizar'}
+}
+
+async function syncPush(){
+  toast('Enviando a NXCC…','info');
+  try{
+    const r=await fetch(`${API}/api/sync/d1-to-nxcc`,{method:'POST'});
+    const j=await r.json();
+    toast(j.ok?`✓ Push · ${j.pushed} contactos`:'Error en push',j.ok?'success':'error');
+    if(j.ok)loadPatients();
+  }catch(e){toast('Error de conexión','error')}
+}
+
+async function syncPull(){
+  toast('Trayendo desde NXCC…','info');
+  try{
+    const r=await fetch(`${API}/api/sync/nxcc-to-d1`,{method:'POST'});
+    const j=await r.json();
+    toast(j.ok?`✓ Pull · Actualizados: ${j.updated}`:'Error en pull',j.ok?'success':'error');
+    if(j.ok)loadPatients();
+  }catch(e){toast('Error de conexión','error')}
+}
+</script>
 </body>
 </html>
